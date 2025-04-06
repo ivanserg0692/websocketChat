@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Chat</title>
+</head>
+<body>
+<h1>WebSocket Chat</h1>
+
+<input id="message" placeholder="Type your message..." />
+<button onclick="sendMessage()">Send</button>
+
+<ul id="messages"></ul>
+
+<script>
+    const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE3NDM5MzM4MDgsImV4cCI6MTc3NTQ2OTgwOCwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsImlkIjoibXkgZnJpZW5kIn0.EtWWApiTzMxg1IsrbLOH6MYPXGBhWhPbFFtG7HdL_ZI'; // Replace with your real token
+    const socketUrl = `ws://localhost:8080/?token=${token}`;
+
+    let socket;
+
+    function connect() {
+        socket = new WebSocket(socketUrl);
+
+        socket.onopen = () => {
+            console.log('[WS] Connected');
+        };
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log('[WS] Message received:', data);
+
+            const li = document.createElement('li');
+            li.textContent = `[${data.room}] ${data.from}: ${data.message}`;
+            document.getElementById('messages').appendChild(li);
+        };
+
+        socket.onclose = (e) => {
+            console.log(`[WS] Disconnected: ${e.code}`);
+            setTimeout(connect, 1000); // Try reconnect
+        };
+
+        socket.onerror = (err) => {
+            console.error('[WS] Error:', err);
+            socket.close();
+        };
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('message');
+        const message = input.value;
+        input.value = '';
+
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                type: 'chat',
+                message: message,
+                room: 'general',
+            }));
+        } else {
+            console.warn('WebSocket not connected');
+        }
+    }
+
+    // Start the connection
+    connect();
+</script>
+</body>
+</html>
