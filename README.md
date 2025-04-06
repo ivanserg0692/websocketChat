@@ -10,7 +10,7 @@ docker-compose up -d
 ```
 
 
-Here an examplme on bitrix for sending messages to the global chat via the Redis connection
+Here's an examplme on bitrix for sending messages to the global chat via the Redis connection
 
 ```php
 use Bitrix\Main\Loader;
